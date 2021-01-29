@@ -38,17 +38,27 @@
     // while ($record = $records->fetch()) {
     //   print($record['item_name'] . "\n");
     // }
+    if (isset($_REQUEST['page']) && is_numeric($_REQUEST['page'])) {
+      $page = $_REQUEST['page'];
+    } else {
+      $page = 1;
+    }
+    $start = 5 * ($page - 1);
 
-    $memos = $db->query('SELECT * FROM memos ORDER BY id DESC');
-
+    $memos = $db->prepare('SELECT * FROM memos ORDER BY id DESC LIMIT ?,5');
+    $memos->bindParam(1, $start, PDO::PARAM_INT);
+    $memos->execute();
     ?>
+
     <article>
       <?php while ($memo = $memos->fetch()) : ?>
         <p><a href="memo.php?id=<?php print($memo['id']); ?>"><?php print(mb_substr($memo['memo'], 0, 50)); ?></a></p>
         <time><?php print($memo['created_at']); ?></time>
         <hr>
       <?php endwhile; ?>
-
+      <?php if ($page >= 2) : ?>
+        <a href="index.php?page=<?php print($page - 1); ?>"><?php print($page - 1); ?>ページ目へ</a>
+      <?php endif; ?> |
       <a href="index.php?page=<?php print($page + 1); ?>"><?php print($page + 1); ?>ページ目へ</a>
     </article>
   </main>
